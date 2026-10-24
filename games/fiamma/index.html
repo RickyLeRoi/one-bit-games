@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Fiamma</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; touch-action: none;
+    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+  body { display: flex; align-items: center; justify-content: center; }
+  canvas { display: block; background: #000; image-rendering: pixelated; image-rendering: crisp-edges; outline: none; }
+
+  #touch { display: none; position: fixed; inset: 0; pointer-events: none; font: bold 13px/1 monospace; }
+  #touch.on { display: block; }
+  #stickZone { position: absolute; left: 0; top: 0; width: 55%; height: 100%; pointer-events: auto; touch-action: none; }
+  #touch[data-mode="menu"] #stickZone { width: 100%; }
+  #stickBase { display: none; position: absolute; width: 92px; height: 92px; margin: -48px 0 0 -48px;
+    border: 2px solid #fff; border-radius: 50%; pointer-events: none; }
+  #stickBase.on { display: block; }
+  #stickKnob { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+    background: #fff; border-radius: 50%; }
+  /* buttons sit in the side bands left free by Gfx.fit() */
+  .btns { position: absolute; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .btns.br { right: max(8px, env(safe-area-inset-right)); bottom: 10px; }
+  .btns.tr { right: max(8px, env(safe-area-inset-right)); top: 8px; }
+  .btns.bl { left: max(8px, env(safe-area-inset-left)); bottom: 10px; }
+  .btns.bc { left: 50%; bottom: 14px; flex-direction: row; gap: 10px; transform: translateX(-50%); }
+  #touch button { pointer-events: auto; width: 70px; height: 52px; padding: 0; background: #000; color: #fff;
+    border: 2px solid #fff; border-radius: 0; font: bold 11px/1 monospace; letter-spacing: 1px; touch-action: none; }
+  #touch button.act, #touch button:active { background: #fff; color: #000; }
+  #touch .btns.tr button { height: 34px; }
+  #touch .btns.bc button { width: auto; height: 44px; padding: 0 14px; }
+  #touch button.play, #touch button.end, #touch button.title { display: none; }
+  #touch[data-mode="play"] button.play { display: block; }
+  #touch[data-state="over"] button.end, #touch[data-state="done"] button.end { display: block; }
+  #touch[data-state="title"] button.title { display: block; }
+  #touch button.tut { display: none; }
+  #touch[data-tut="1"] button.tut { display: block; }
+  /* by day (light device theme, day scene: engine Theme) the page around the canvas and the buttons swap too */
+  html[data-theme="day"], html[data-theme="day"] body, html[data-theme="day"] canvas { background: #fff; }
+  html[data-theme="day"] #touch button { background: #fff; color: #000; border-color: #000; }
+  html[data-theme="day"] #touch button.act, html[data-theme="day"] #touch button:active { background: #000; color: #fff; }
+  html[data-theme="day"] #stickBase { border-color: #000; }
+  html[data-theme="day"] #stickKnob { background: #000; }
+</style>
+</head>
+<body>
+<canvas id="game" width="384" height="216" tabindex="0"></canvas>
+
+<div id="touch" data-mode="menu" data-state="title">
+  <div id="stickZone"></div>
+  <div id="stickBase"><div id="stickKnob"></div></div>
+  <div class="btns tr">
+    <button data-edge="mute">AUDIO</button>
+    <button data-edge="restart" class="play">R</button>
+    <button data-edge="pause" class="play">II</button>
+    <button data-edge="skip" class="tut">SALTA</button>
+  </div>
+  <div class="btns br">
+    <button data-hold="charge:1" class="play">CARICA</button>
+    <button data-edge="grab" class="play">PRENDI</button>
+  </div>
+  <div class="btns bl">
+    <button data-hold="heatUp:1" class="play">+ CALDO</button>
+    <button data-hold="heatDown:1" class="play">- CALDO</button>
+  </div>
+  <div class="btns bc">
+    <button data-edge="replay" class="end">REPLAY</button>
+    <button data-edge="daily" class="title">SFIDA DEL GIORNO</button>
+  </div>
+</div>
+
+<!-- build:js (build.js replaces this block with one inline script) -->
+<script src="src/config.js"></script>
+<script src="../../engine/core/util.js"></script>
+<script src="../../engine/core/strings.js"></script>
+<script src="../../engine/core/geometry.js"></script>
+<script src="../../engine/core/replay.js"></script>
+<script src="../../engine/core/loop.js"></script>
+<script src="../../engine/gfx/sprite.js"></script>
+<script src="src/sprites.js"></script>
+<script src="../../engine/gfx/gfx.js"></script>
+<script src="../../engine/gfx/lighting.js"></script>
+<script src="../../engine/gfx/ui.js"></script>
+<script src="../../engine/gfx/theme.js"></script>
+<script src="../../engine/core/steps.js"></script>
+<script src="src/state.js"></script>
+<script src="../../engine/audio/synth.js"></script>
+<script src="src/sfx.js"></script>
+<script src="../../engine/input/input.js"></script>
+<script src="src/bindings.js"></script>
+<script src="../../engine/world/terrain.js"></script>
+<script src="../../engine/world/particles.js"></script>
+<script src="../../engine/world/weather.js"></script>
+<script src="../../engine/world/camera.js"></script>
+<script src="src/level.js"></script>
+<script src="src/flame.js"></script>
+<script src="src/world.js"></script>
+<script src="src/env.js"></script>
+<script src="src/tutorial.js"></script>
+<script src="src/render.js"></script>
+<script src="../../engine/core/flow.js"></script>
+<script src="src/main.js"></script>
+<!-- /build:js -->
+</body>
+</html>

@@ -65,7 +65,7 @@ function boot(options = {}) {
   const takeSnapshot = loadSnapshotFunction(gameId);
   const seededMath = options.seededMath === undefined ? null : seededRandom(options.seededMath);
   const pixelBuffer = new Uint8Array(W * H);
-  const stats = { nonInt: 0, badColor: 0 };
+  const stats = { nonInt: 0, badColor: 0, fills: 0, area: 0 };   // fills and area: drawing cost counters (calls and pixels per fillRect)
   let offsetX = 0, offsetY = 0, fill = '#fff', compositeOperation = 'source-over', capture = false;
   const fakeContext = {
     get fillStyle() { return fill; },
@@ -76,6 +76,7 @@ function boot(options = {}) {
     createPattern(patternCanvas) { return { pattern: true, c: patternCanvas }; },
     fillRect(x, y, width, height) {
       if (!Number.isInteger(x) || !Number.isInteger(y) || !Number.isInteger(width) || !Number.isInteger(height)) stats.nonInt++;
+      stats.fills++; stats.area += Math.max(0, width) * Math.max(0, height);
       if (!capture) return;
       const startX = Math.max(0, x + offsetX), startY = Math.max(0, y + offsetY), endX = Math.min(W, x + offsetX + width), endY = Math.min(H, y + offsetY + height);
       for (let pixelY = startY; pixelY < endY; pixelY++) for (let pixelX = startX; pixelX < endX; pixelX++) {

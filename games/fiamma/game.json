@@ -1,0 +1,12 @@
+{
+  "id": "fiamma",
+  "title": "Fiamma",
+  "shortName": "Fiamma",
+  "lang": "it",
+  "description": "Soccorso col fuoco: regola l'intensita della fiamma per volare, aprirti la strada, far evaporare l'acqua e portare in salvo i sopravvissuti, pixel art bianco su nero.",
+  "icon": {
+    "file": "src/sprites.js",
+    "sprite": "icon"
+  },
+  "debugGlobal": "__fiamma"
+}
